@@ -67,11 +67,16 @@ class SpatialMetadata(p.SingletonPlugin):
     p.implements(p.ITemplateHelpers, inherit=True)
 
     def configure(self, config):
-        from ckanext.spatial.model.package_extent import setup as setup_model
+        self.search_backend = config.get('ckanext.spatial.search_backend', 'solr-spatial-field')
 
-        if not p.toolkit.asbool(config.get('ckan.spatial.testing', 'False')):
-            log.debug('Setting up the spatial model')
-            setup_model()
+        # PostGIS is deprecated in favor of Solr; setting up the model is
+        # not necessary
+        if self.search_backend == "postgis":
+            from ckanext.spatial.model.package_extent import setup as setup_model
+
+            if not p.toolkit.asbool(config.get('ckan.spatial.testing', 'False')):
+                log.debug('Setting up the spatial model')
+                setup_model()
 
     def update_config(self, config):
         ''' Set up the resource library, public directory and
@@ -87,13 +92,22 @@ class SpatialMetadata(p.SingletonPlugin):
         mimetypes.add_type('application/gml+xml', '.gml')
 
     def create(self, package):
-        self.check_spatial_extra(package)
+        # check_spatial_extra is deprecated and only necessary when using
+        # a PostGIS backend
+        if self.search_backend == "postgis":
+            self.check_spatial_extra(package)
 
     def edit(self, package):
-        self.check_spatial_extra(package)
+        # check_spatial_extra is deprecated and only necessary when using
+        # a PostGIS backend
+        if self.search_backend == "postgis":
+            self.check_spatial_extra(package)
 
     def check_spatial_extra(self,package):
         '''
+        DEPRECATED: This method is not called when using one of the Solr
+        backends.
+
         For a given package, looks at the spatial extent (as given in the
         extra "spatial" in GeoJSON format) and records it in PostGIS.
         '''
@@ -137,6 +151,8 @@ class SpatialMetadata(p.SingletonPlugin):
 
 
     def delete(self, package):
+        # save_package_extend is deprecated and only necessary when using
+        # a PostGIS backend
         from ckanext.spatial.lib import save_package_extent
         save_package_extent(package.id,None)
 
