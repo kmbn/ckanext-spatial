@@ -92,69 +92,10 @@ class SpatialMetadata(p.SingletonPlugin):
         mimetypes.add_type('application/gml+xml', '.gml')
 
     def create(self, package):
-        # check_spatial_extra is deprecated and only necessary when using
-        # a PostGIS backend
-        if self.search_backend == "postgis":
-            self.check_spatial_extra(package)
+        return package
 
     def edit(self, package):
-        # check_spatial_extra is deprecated and only necessary when using
-        # a PostGIS backend
-        if self.search_backend == "postgis":
-            self.check_spatial_extra(package)
-
-    def check_spatial_extra(self,package):
-        '''
-        DEPRECATED: This method is not called when using one of the Solr
-        backends.
-
-        For a given package, looks at the spatial extent (as given in the
-        extra "spatial" in GeoJSON format) and records it in PostGIS.
-        '''
-        from ckanext.spatial.lib import save_package_extent
-
-        if not package.id:
-            log.warning('Couldn\'t store spatial extent because no id was provided for the package')
-            return
-
-        # TODO: deleted extra
-        for extra in package.extras_list:
-            if extra.key == 'spatial':
-                if extra.state == 'active' and extra.value:
-                    try:
-                        log.debug('Received: %r' % extra.value)
-                        geometry = json.loads(extra.value)
-                    except ValueError,e:
-                        error_dict = {'spatial':[u'Error decoding JSON object: %s' % str(e)]}
-                        raise p.toolkit.ValidationError(error_dict, error_summary=package_error_summary(error_dict))
-                    except TypeError,e:
-                        error_dict = {'spatial':[u'Error decoding JSON object: %s' % str(e)]}
-                        raise p.toolkit.ValidationError(error_dict, error_summary=package_error_summary(error_dict))
-
-                    try:
-                        save_package_extent(package.id,geometry)
-
-                    except ValueError,e:
-                        error_dict = {'spatial':[u'Error creating geometry: %s' % str(e)]}
-                        raise p.toolkit.ValidationError(error_dict, error_summary=package_error_summary(error_dict))
-                    except Exception, e:
-                        if bool(os.getenv('DEBUG')):
-                            raise
-                        error_dict = {'spatial':[u'Error: %s' % str(e)]}
-                        raise p.toolkit.ValidationError(error_dict, error_summary=package_error_summary(error_dict))
-
-                elif (extra.state == 'active' and not extra.value) or extra.state == 'deleted':
-                    # Delete extent from table
-                    save_package_extent(package.id,None)
-
-                break
-
-
-    def delete(self, package):
-        # save_package_extend is deprecated and only necessary when using
-        # a PostGIS backend
-        from ckanext.spatial.lib import save_package_extent
-        save_package_extent(package.id,None)
+        return package
 
     ## ITemplateHelpers
 
