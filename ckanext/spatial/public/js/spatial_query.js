@@ -40,6 +40,9 @@ this.ckan.module('spatial-query', function ($, _) {
         }
       }
       this.el.ready(this._onReady);
+
+      $('body').addClass('dataset-map-expanded');
+
     },
 
     _getParameterByName: function (name) {
@@ -70,7 +73,7 @@ this.ckan.module('spatial-query', function ($, _) {
       var previous_box;
       var previous_extent;
       var is_exanded = false;
-      var should_zoom = true;
+      var should_zoom = false;
       var form = $("#dataset-search");
       // CKAN 2.1
       if (!form.length) {
@@ -111,12 +114,11 @@ this.ckan.module('spatial-query', function ($, _) {
       // OK add the expander
       $('a.leaflet-draw-draw-rectangle', module.el).on('click', function(e) {
         if (!is_exanded) {
-          $('body').addClass('dataset-map-expanded');
           if (should_zoom && !extentLayer) {
             map.zoomIn();
           }
           resetMap();
-          is_exanded = true;
+          is_exanded = false;
         }
       });
 
@@ -125,7 +127,6 @@ this.ckan.module('spatial-query', function ($, _) {
 
       // Handle the cancel expanded action
       $('.cancel', buttons).on('click', function() {
-        $('body').removeClass('dataset-map-expanded');
         if (extentLayer) {
           map.removeLayer(extentLayer);
         }
@@ -138,7 +139,6 @@ this.ckan.module('spatial-query', function ($, _) {
       // Handle the apply expanded action
       $('.apply', buttons).on('click', function() {
         if (extentLayer) {
-          $('body').removeClass('dataset-map-expanded');
           is_exanded = false;
           resetMap();
           // Eugh, hacky hack.
