@@ -131,10 +131,11 @@ class SpatialQuery(p.SingletonPlugin):
         return map
 
     def before_index(self, pkg_dict):
-        import shapely
-        import shapely.geometry
 
         if pkg_dict.get('extras_spatial', None) and self.search_backend in ('solr', 'solr-spatial-field'):
+            import shapely
+            import shapely.geometry
+
             try:
                 geometry = json.loads(pkg_dict['extras_spatial'])
             except ValueError, e:

@@ -5,7 +5,6 @@ from ckan.model import Session, Package
 from ckan.lib.base import config
 
 from ckanext.spatial.model import PackageExtent
-from shapely.geometry import asShape
 
 from ckanext.spatial.geoalchemy_common import (WKTElement, ST_Transform,
                                                compare_geometry_fields,
@@ -44,6 +43,8 @@ def save_package_extent(package_id, geometry = None, srid = None):
        The responsibility for calling model.Session.commit() is left to the
        caller.
     '''
+    from shapely.geometry import asShape
+
     db_srid = int(config.get('ckan.spatial.srid', '4326'))
 
 
